@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Romeo and Juliet - Act I</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         :root {
             --bg-color: #f8f1e9;
@@ -22,6 +25,8 @@
             --title-color: #9c4221;
             --subtitle-color: #854d0e;
             --highlight-bg: #fef3c7;
+            --progress-bg: #e5e7eb;
+            --progress-fill: #9b4d0a;
         }
         [data-theme="dark"] {
             --bg-color: #1f2937;
@@ -39,24 +44,33 @@
             --title-color: #f59e0b;
             --subtitle-color: #d4d4d8;
             --highlight-bg: #713f12;
+            --progress-bg: #4b5563;
+            --progress-fill: #f59e0b;
         }
         body {
             font-family: 'Georgia', serif;
-            background-color: var(--bg-color);
+            background: linear-gradient(to bottom, var(--gradient-start), var(--gradient-end));
             color: var(--text-color);
         }
-        .dialogue {
-            margin-left: 2rem;
-            padding-left: 1rem;
+        .dialogue-card {
             border-left: 2px solid var(--border-color);
+            transition: background-color 0.3s ease;
         }
-        .speaker {
-            font-variant: small-caps;
+        .dialogue-card:hover {
+            background-color: var(--nav-link-hover-bg);
+        }
+        .dialogue-card.hidden {
+            display: none;
+        }
+        .dialogue-card.highlighted {
+            background-color: var(--highlight-bg);
+        }
+        .dialogue-card .card-title {
             color: var(--speaker-color);
+            font-variant: small-caps;
             cursor: pointer;
-            transition: color 0.3s ease;
         }
-        .speaker:hover {
+        .dialogue-card .card-title:hover {
             color: var(--nav-link-active-color);
         }
         .stage-direction {
@@ -70,25 +84,14 @@
             transform: translateY(20px);
             animation: fadeInUp 1.5s ease-out forwards;
         }
-        .dialogue p {
+        .dialogue-card {
             opacity: 0;
             transform: translateX(-20px);
             transition: opacity 0.5s ease, transform 0.5s ease;
         }
-        .dialogue p.visible {
+        .dialogue-card.visible {
             opacity: 1;
             transform: translateX(0);
-        }
-        .dialogue p:hover {
-            background-color: var(--nav-link-hover-bg);
-            transform: translateX(5px);
-            transition: background-color 0.3s ease, transform 0.3s ease;
-        }
-        .dialogue p.hidden {
-            display: none;
-        }
-        .dialogue p.highlighted {
-            background-color: var(--highlight-bg);
         }
         .final-dialogue {
             animation: pulse 2s ease-in-out infinite;
@@ -107,39 +110,6 @@
                 transform: scale(1.02);
             }
         }
-        .section-title {
-            opacity: 0;
-            transform: scale(0.95);
-            transition: opacity 0.8s ease, transform 0.8s ease;
-        }
-        .section-title.visible {
-            opacity: 1;
-            transform: scale(1);
-        }
-        .nav-link {
-            color: var(--nav-link-color);
-            padding: 0.5rem 1rem;
-            transition: all 0.3s ease;
-        }
-        .nav-link:hover {
-            background-color: var(--nav-link-hover-bg);
-        }
-        .nav-link.active {
-            color: var(--nav-link-active-color);
-            font-weight: bold;
-            background-color: var(--nav-link-active-bg);
-        }
-        .theme-toggle, .toggle-dialogue, .random-quote {
-            padding: 0.5rem 1rem;
-            border-radius: 0.25rem;
-            background-color: var(--nav-link-hover-bg);
-            color: var(--nav-link-color);
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        .theme-toggle:hover, .toggle-dialogue:hover, .random-quote:hover {
-            background-color: var(--nav-link-active-bg);
-        }
         .quote-box {
             display: none;
             position: fixed;
@@ -148,198 +118,654 @@
             transform: translateX(-50%);
             background-color: var(--container-bg);
             color: var(--text-color);
-            padding: 1rem;
             border: 1px solid var(--border-color);
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            z-index: 20;
+            z-index: 1000;
             max-width: 80%;
-            text-align: center;
         }
         .quote-box.visible {
             display: block;
         }
+        .navbar {
+            background-color: var(--container-bg);
+        }
+        .navbar-brand, .nav-link {
+            color: var(--nav-link-color) !important;
+        }
+        .nav-link:hover {
+            background-color: var(--nav-link-hover-bg);
+        }
+        .nav-link.active {
+            color: var(--nav-link-active-color) !important;
+            font-weight: bold;
+            background-color: var(--nav-link-active-bg);
+        }
+        .search-highlight {
+            background-color: var(--highlight-bg);
+        }
+        audio {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            z-index: 1000;
+        }
+        .progress-bar-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background-color: var(--progress-bg);
+            z-index: 1100;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: var(--progress-fill);
+            width: 0;
+            transition: width 0.3s ease;
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center bg-gradient-to-b from-[var(--gradient-start)] to-[var(--gradient-end)]">
-    <nav class="w-full bg-[var(--container-bg)] shadow-md sticky top-0 z-10">
-        <div class="max-w-3xl mx-auto p-4 flex justify-between items-center">
-            <div class="flex space-x-4">
-                <a href="#prologue" class="nav-link" data-section="prologue">Prologs</a>
-                <a href="#scene1" class="nav-link" data-section="scene1">1. aina</a>
-            </div>
-            <div class="flex space-x-4">
-                <button class="toggle-dialogue" onclick="toggleDialogue()">Hide/Show Dialogue</button>
-                <button class="random-quote" onclick="showRandomQuote()">Random Quote</button>
-                <button class="theme-toggle" onclick="toggleTheme()">Toggle Theme</button>
+<body>
+    <!-- Progress Bar -->
+    <div class="progress-bar-container">
+        <div class="progress-bar" id="progress-bar"></div>
+    </div>
+
+    <!-- Bootstrap Navbar -->
+    <nav class="navbar navbar-expand-lg sticky-top shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="#">Romeo and Juliet</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#prologue" data-section="prologue"><i class="bi bi-book me-1"></i>Prologs</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#scene1" data-section="scene1"><i class="bi bi-theater-masks me-1"></i>1. aina</a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center">
+                    <input type="text" id="search-input" class="form-control me-2" placeholder="Search..." style="max-width: 150px;">
+                    <select id="role-filter" class="form-select me-2" style="max-width: 150px;">
+                        <option value="">All Characters</option>
+                        <option value="Sampson">Sampson</option>
+                        <option value="Gregory">Gregory</option>
+                        <option value="Abraham">Abraham</option>
+                        <option value="Benvolio">Benvolio</option>
+                        <option value="Tybalt">Tybalt</option>
+                        <option value="First Citizen">First Citizen</option>
+                        <option value="Capulet">Capulet</option>
+                        <option value="Lady Capulet">Lady Capulet</option>
+                        <option value="Montague">Montague</option>
+                        <option value="Lady Montague">Lady Montague</option>
+                        <option value="Prince">Prince</option>
+                    </select>
+                    <button class="btn btn-outline-secondary me-2 toggle-dialogue" onclick="toggleDialogue()"><i class="bi bi-eye"></i> Hide/Show</button>
+                    <button class="btn btn-outline-secondary me-2 random-quote" onclick="showRandomQuote()"><i class="bi bi-quote"></i> Quote</button>
+                    <button class="btn btn-outline-secondary theme-toggle" onclick="toggleTheme()"><i class="bi bi-moon"></i> Theme</button>
+                </div>
             </div>
         </div>
     </nav>
 
-    <div id="quote-box" class="quote-box">
-        <p id="random-quote-text"></p>
-        <button onclick="hideQuoteBox()" class="mt-2 text-[var(--nav-link-active-color)]">Close</button>
+    <!-- Random Quote Box -->
+    <div id="quote-box" class="quote-box card shadow-sm p-3">
+        <p id="random-quote-text" class="card-text"></p>
+        <button onclick="hideQuoteBox()" class="btn btn-sm btn-outline-secondary mt-2">Close</button>
     </div>
 
-    <div class="max-w-3xl w-full p-6 bg-[var(--container-bg)] shadow-lg rounded-lg my-8">
-        <h1 class="text-4xl font-bold text-center text-[var(--title-color)] mb-6">Romeo and Juliet</h1>
-        <h2 class="text-2xl text-center text-[var(--subtitle-color)] mb-4 section-title">Act I</h2>
+    <!-- Main Content -->
+    <div class="container my-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="text-center fw-bold mb-4" style="color: var(--title-color);">Romeo and Juliet</h1>
+                <h2 class="text-center text-muted mb-4 section-title">Act I</h2>
 
-        <h3 id="prologue" class="text-xl font-semibold text-center text-[var(--title-color)] mb-6 section-title">Prologue</h3>
-        <p class="prologue text-center mb-8 leading-relaxed">
-            Two households, both alike in dignity,<br>
-            In fair Verona, where we lay our scene,<br>
-            From ancient grudge break to new mutiny,<br>
-            Where civil blood makes civil hands unclean.<br>
-            From forth the fatal loins of these two foes<br>
-            A pair of star-cross'd lovers take their life;<br>
-            Whose misadventured piteous overthrows<br>
-            Do with their death bury their parents' strife.<br>
-            The fearful passage of their death-mark'd love,<br>
-            And the continuance of their parents' rage,<br>
-            Which, but their children's end, nought could remove,<br>
-            Is now the two hours' traffic of our stage;<br>
-            The which if you with patient ears attend,<br>
-            What here shall miss, our toil shall strive to mend.
-        </p>
+                <h3 id="prologue" class="text-center fw-bold mb-4 section-title" style="color: var(--title-color);">Prologue</h3>
+                <div class="row mb-5">
+                    <div class="col-12">
+                        <p class="prologue text-center">
+                            Two households, both alike in dignity,<br>
+                            In fair Verona, where we lay our scene,<br>
+                            From ancient grudge break to new mutiny,<br>
+                            Where civil blood makes civil hands unclean.<br>
+                            From forth the fatal loins of these two foes<br>
+                            A pair of star-cross'd lovers take their life;<br>
+                            Whose misadventured piteous overthrows<br>
+                            Do with their death bury their parents' strife.<br>
+                            The fearful passage of their death-mark'd love,<br>
+                            And the continuance of their parents' rage,<br>
+                            Which, but their children's end, nought could remove,<br>
+                            Is now the two hours' traffic of our stage;<br>
+                            The which if you with patient ears attend,<br>
+                            What here shall miss, our toil shall strive to mend.
+                        </p>
+                    </div>
+                </div>
 
-        <h3 id="scene1" class="text-xl font-semibold text-center text-[var(--title-color)] mb-6 section-title">Scene I. Verona. A public place.</h3>
-        <p class="stage-direction text-center mb-4">
-            Enter SAMPSON and GREGORY, of the house of Capulet, armed with swords and bucklers
-        </p>
+                <h3 id="scene1" class="text-center fw-bold mb-4 section-title" style="color: var(--title-color);">Scene I. Verona. A public place.</h3>
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <p class="stage-direction text-center text-muted">
+                            Enter SAMPSON and GREGORY, of the house of Capulet, armed with swords and bucklers
+                        </p>
+                    </div>
+                </div>
 
-        <div class="dialogue">
-            <p data-speaker="Sampson"><span class="speaker">Sampson</span><br>Gregory, o' my word, we'll not carry coals.</p>
-            <p data-speaker="Gregory"><span class="speaker">Gregory</span><br>No, for then we should be colliers.</p>
-            <p data-speaker="Sampson"><span class="speaker">Sampson</span><br>I mean, an we be in choler, we'll draw.</p>
-            <p data-speaker="Gregory"><span class="speaker">Gregory</span><br>Ay, while you live, draw your neck out o' the collar.</p>
-            <p data-speaker="Sampson"><span class="speaker">Sampson</span><br>I strike quickly, being moved.</p>
-            <p data-speaker="Gregory"><span class="speaker">Gregory</span><br>But thou art not quickly moved to strike.</p>
-            <p data-speaker="Sampson"><span class="speaker">Sampson</span><br>A dog of the house of Montague moves me.</p>
-            <p data-speaker="Gregory"><span class="speaker">Gregory</span><br>To move is to stir; and to be valiant is to stand: therefore, if thou art moved, thou runn'st away.</p>
-            <p data-speaker="Sampson"><span class="speaker">Sampson</span><br>A dog of that house shall move me to stand: I will take the wall of any man or maid of Montague's.</p>
-            <p data-speaker="Gregory"><span class="speaker">Gregory</span><br>That shows thee a weak slave; for the weakest goes to the wall.</p>
-            <p data-speaker="Sampson"><span class="speaker">Sampson</span><br>True; and therefore women, being the weaker vessels, are ever thrust to the wall: therefore I will push Montague's men from the wall, and thrust his maids to the wall.</p>
-            <p data-speaker="Gregory"><span class="speaker">Gregory</span><br>The quarrel is between our masters and us their men.</p>
-            <p data-speaker="Sampson"><span class="speaker">Sampson</span><br>'Tis all one, I will show myself a tyrant: when I have fought with the men, I will be cruel with the maids, and cut off their heads.</p>
-            <p data-speaker="Gregory"><span class="speaker">Gregory</span><br>The heads of the maids?</p>
-            <p data-speaker="Sampson"><span class="speaker">Sampson</span><br>Ay, the heads of the maids, or their maidenheads; take it in what sense thou wilt.</p>
-            <p data-speaker="Gregory"><span class="speaker">Gregory</span><br>They must take it in sense that feel it.</p>
-            <p data-speaker="Sampson"><span class="speaker">Sampson</span><br>Me they shall feel while I am able to stand: and 'tis known I am a pretty piece of flesh.</p>
-            <p data-speaker="Gregory"><span class="speaker">Gregory</span><br>'Tis well thou art not fish; if thou hadst, thou hadst been poor John. Draw thy tool! here comes two of the house of the Montagues.</p>
-            <p data-speaker="Sampson"><span class="speaker">Sampson</span><br>My naked weapon is out: quarrel, I will back thee.</p>
-            <p data-speaker="Gregory"><span class="speaker">Gregory</span><br>How! turn thy back and run?</p>
-            <p data-speaker="Sampson"><span class="speaker">Sampson</span><br>Fear me not.</p>
-            <p data-speaker="Gregory"><span class="speaker">Gregory</span><br>No, marry; I fear thee!</p>
-            <p data-speaker="Sampson"><span class="speaker">Sampson</span><br>Let us take the law of our sides; let them begin.</p>
-            <p data-speaker="Gregory"><span class="speaker">Gregory</span><br>I will frown as I pass by, and let them take it as they list.</p>
-            <p data-speaker="Sampson"><span class="speaker">Sampson</span><br>Nay, as they dare. I will bite my thumb at them; which is a disgrace to them, if they bear it.</p>
-            <p class="stage-direction">Enter ABRAHAM and BALTHASAR</p>
-            <p data-speaker="Abraham"><span class="speaker">Abraham</span><br>Do you bite your thumb at us, sir?</p>
-            <p data-speaker="Sampson"><span class="speaker">Sampson</span><br>I do bite my thumb, sir.</p>
-            <p data-speaker="Abraham"><span class="speaker">Abraham</span><br>Do you bite your thumb at us, sir?</p>
-            <p data-speaker="Sampson"><span class="speaker">Sampson</span><br>[Aside to GREGORY] Is the law of our side, if I say ay?</p>
-            <p data-speaker="Gregory"><span class="speaker">Gregory</span><br>No.</p>
-            <p data-speaker="Sampson"><span class="speaker">Sampson</span><br>No, sir, I do not bite my thumb at you, sir, but I bite my thumb, sir.</p>
-            <p data-speaker="Gregory"><span class="speaker">Gregory</span><br>Do you quarrel, sir?</p>
-            <p data-speaker="Abraham"><span class="speaker">Abraham</span><br>Quarrel sir! no, sir.</p>
-            <p data-speaker="Sampson"><span class="speaker">Sampson</span><br>If you do, sir, I am for you: I serve as good a man as you.</p>
-            <p data-speaker="Abraham"><span class="speaker">Abraham</span><br>No better.</p>
-            <p data-speaker="Sampson"><span class="speaker">Sampson</span><br>Well, sir.</p>
-            <p data-speaker="Gregory"><span class="speaker">Gregory</span><br>Say 'better:' here comes one of my master's kinsmen.</p>
-            <p data-speaker="Sampson"><span class="speaker">Sampson</span><br>Yes, better, sir.</p>
-            <p data-speaker="Abraham"><span class="speaker">Abraham</span><br>You lie.</p>
-            <p data-speaker="Sampson"><span class="speaker">Sampson</span><br>Draw, if you be men. Gregory, remember thy swashing blow.</p>
-            <p class="stage-direction">They fight</p>
-            <p class="stage-direction">Enter BENVOLIO</p>
-            <p data-speaker="Benvolio"><span class="speaker">Benvolio</span><br>Part, fools! Put up your swords; you know not what you do.</p>
-            <p class="stage-direction">Beats down their swords</p>
-            <p class="stage-direction">Enter TYBALT</p>
-            <p data-speaker="Tybalt"><span class="speaker">Tybalt</span><br>What, art thou drawn among these heartless hinds? Turn thee, Benvolio, look upon thy death.</p>
-            <p data-speaker="Benvolio"><span class="speaker">Benvolio</span><br>I do but keep the peace: put up thy sword, Or manage it to part these men with me.</p>
-            <p data-speaker="Tybalt"><span class="speaker">Tybalt</span><br>What, drawn, and talk of peace! I hate the word, As I hate hell, all Montagues, and thee: Have at thee, coward!</p>
-            <p class="stage-direction">They fight</p>
-            <p class="stage-direction">Enter, several of both houses, who join the fray; then enter Citizens, with clubs</p>
-            <p data-speaker="First Citizen"><span class="speaker">First Citizen</span><br>Clubs, bills, and partisans! strike! beat them down! Down with the Capulets! down with the Montagues!</p>
-            <p class="stage-direction">Enter CAPULET in his gown, and LADY CAPULET</p>
-            <p data-speaker="Capulet"><span class="speaker">Capulet</span><br>What noise is this? Give me my long sword, ho!</p>
-            <p data-speaker="Lady Capulet"><span class="speaker">Lady Capulet</span><br>A crutch, a crutch! why call you for a sword?</p>
-            <p data-speaker="Capulet"><span class="speaker">Capulet</span><br>My sword, I say! Old Montague is come, And flourishes his blade in spite of me.</p>
-            <p class="stage-direction">Enter MONTAGUE and LADY MONTAGUE</p>
-            <p data-speaker="Montague"><span class="speaker">Montague</span><br>Thou villain Capulet,--Hold me not, let me go.</p>
-            <p data-speaker="Lady Montague"><span class="speaker">Lady Montague</span><br>Thou shalt not stir a foot to seek a foe.</p>
-            <p class="stage-direction">Enter PRINCE, with Attendants</p>
-            <p data-speaker="Prince"><span class="speaker">Prince</span><br>Rebellious subjects, enemies to peace, Profaners of this neighbour-stained steel,-- Will they not hear? What, ho! you men, you beasts, That quench the fire of your pernicious rage With purple fountains issuing from your veins, On pain of torture, from those bloody hands Throw your mistemper'd weapons to the ground, And hear the sentence of your moved prince. Three civil brawls, bred of an airy word, By thee, old Capulet, and Montague, Have thrice disturb'd the quiet of our streets, And made Verona's ancient citizens Cast by their grave beseeming ornaments, To wield old partisans, in hands as old, Canker'd with peace, to part your canker'd hate: If ever you disturb our streets again, Your lives shall pay the forfeit of the peace. For this time, all the rest depart away: You Capulet; shall go along with me: And, Montague, come you this afternoon, To know our further pleasure in this case, To old Free-town, our common judgment-place. Once more, on pain of death, all men depart.</p>
-            <p class="stage-direction">Exeunt all but MONTAGUE, LADY MONTAGUE, and BENVOLIO</p>
-            <p data-speaker="Montague"><span class="speaker">Montague</span><br>Who set this ancient quarrel new abroach? Speak, nephew, were you by when it began?</p>
-            <p data-speaker="Benvolio"><span class="speaker">Benvolio</span><br>Here were the servants of your adversary, And yours, close fighting ere I did approach: I drew to part them: in the instant came The fiery Tybalt, with his sword prepared, Which, as he breathed defiance to my ears, He swung about his head and cut the winds, Who nothing hurt withal hiss'd him in scorn: While we were interchanging thrusts and blows, Came more and more and fought on part and part, Till the prince came, who parted either part.</p>
-            <p class="final-dialogue" data-speaker="Lady Montague"><span class="speaker">Lady Montague</span><br>O, where is Romeo? saw you him to-day? Right glad I am he was not at this fray.</p>
+                <div class="row dialogue">
+                    <div class="col-12">
+                        <div class="dialogue-card card mb-2" data-speaker="Sampson" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Sampson <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">Gregory, o' my word, we'll not carry coals.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Gregory" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Gregory <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">No, for then we should be colliers.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Sampson" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Sampson <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">I mean, an we be in choler, we'll draw.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Gregory" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Gregory <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">Ay, while you live, draw your neck out o' the collar.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Sampson" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Sampson <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">I strike quickly, being moved.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Gregory" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Gregory <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">But thou art not quickly moved to strike.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Sampson" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Sampson <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">A dog of the house of Montague moves me.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Gregory" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Gregory <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">To move is to stir; and to be valiant is to stand: therefore, if thou art moved, thou runn'st away.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Sampson" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Sampson <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">A dog of that house shall move me to stand: I will take the wall of any man or maid of Montague's.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Gregory" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Gregory <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">That shows thee a weak slave; for the weakest goes to the wall.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Sampson" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Sampson <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">True; and therefore women, being the weaker vessels, are ever thrust to the wall: therefore I will push Montague's men from the wall, and thrust his maids to the wall.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Gregory" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Gregory <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">The quarrel is between our masters and us their men.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Sampson" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Sampson <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">'Tis all one, I will show myself a tyrant: when I have fought with the men, I will be cruel with the maids, and cut off their heads.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Gregory" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Gregory <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">The heads of the maids?</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Sampson" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Sampson <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">Ay, the heads of the maids, or their maidenheads; take it in what sense thou wilt.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Gregory" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Gregory <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">They must take it in sense that feel it.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Sampson" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Sampson <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">Me they shall feel while I am able to stand: and 'tis known I am a pretty piece of flesh.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Gregory" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Gregory <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">'Tis well thou art not fish; if thou hadst, thou hadst been poor John. Draw thy tool! here comes two of the house of the Montagues.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Sampson" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Sampson <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">My naked weapon is out: quarrel, I will back thee.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Gregory" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Gregory <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">How! turn thy back and run?</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Sampson" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Sampson <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">Fear me not.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Gregory" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Gregory <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">No, marry; I fear thee!</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Sampson" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Sampson <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">Let us take the law of our sides; let them begin.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Gregory" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Gregory <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">I will frown as I pass by, and let them take it as they list.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Sampson" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Sampson <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">Nay, as they dare. I will bite my thumb at them; which is a disgrace to them, if they bear it.</p>
+                            </div>
+                        </div>
+                        <div class="stage-direction text-center text-muted mb-3">Enter ABRAHAM and BALTHASAR</div>
+                        <div class="dialogue-card card mb-2" data-speaker="Abraham" data-family="Montague">
+                            <div class="card-body">
+                                <h5 class="card-title">Abraham <span class="badge bg-secondary ms-2">Montague</span></h5>
+                                <p class="card-text">Do you bite your thumb at us, sir?</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Sampson" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Sampson <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">I do bite my thumb, sir.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Abraham" data-family="Montague">
+                            <div class="card-body">
+                                <h5 class="card-title">Abraham <span class="badge bg-secondary ms-2">Montague</span></h5>
+                                <p class="card-text">Do you bite your thumb at us, sir?</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Sampson" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Sampson <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">[Aside to GREGORY] Is the law of our side, if I say ay?</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Gregory" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Gregory <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">No.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Sampson" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Sampson <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">No, sir, I do not bite my thumb at you, sir, but I bite my thumb, sir.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Gregory" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Gregory <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">Do you quarrel, sir?</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Abraham" data-family="Montague">
+                            <div class="card-body">
+                                <h5 class="card-title">Abraham <span class="badge bg-secondary ms-2">Montague</span></h5>
+                                <p class="card-text">Quarrel sir! no, sir.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Sampson" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Sampson <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">If you do, sir, I am for you: I serve as good a man as you.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Abraham" data-family="Montague">
+                            <div class="card-body">
+                                <h5 class="card-title">Abraham <span class="badge bg-secondary ms-2">Montague</span></h5>
+                                <p class="card-text">No better.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Sampson" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Sampson <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">Well, sir.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Gregory" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Gregory <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">Say 'better:' here comes one of my master's kinsmen.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Sampson" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Sampson <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">Yes, better, sir.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Abraham" data-family="Montague">
+                            <div class="card-body">
+                                <h5 class="card-title">Abraham <span class="badge bg-secondary ms-2">Montague</span></h5>
+                                <p class="card-text">You lie.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Sampson" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Sampson <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">Draw, if you be men. Gregory, remember thy swashing blow.</p>
+                            </div>
+                        </div>
+                        <div class="stage-direction text-center text-muted mb-3">They fight</div>
+                        <div class="stage-direction text-center text-muted mb-3">Enter BENVOLIO</div>
+                        <div class="dialogue-card card mb-2" data-speaker="Benvolio" data-family="Montague">
+                            <div class="card-body">
+                                <h5 class="card-title">Benvolio <span class="badge bg-secondary ms-2">Montague</span></h5>
+                                <p class="card-text">Part, fools! Put up your swords; you know not what you do.</p>
+                            </div>
+                        </div>
+                        <div class="stage-direction text-center text-muted mb-3">Beats down their swords</div>
+                        <div class="stage-direction text-center text-muted mb-3">Enter TYBALT</div>
+                        <div class="dialogue-card card mb-2" data-speaker="Tybalt" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Tybalt <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">What, art thou drawn among these heartless hinds? Turn thee, Benvolio, look upon thy death.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Benvolio" data-family="Montague">
+                            <div class="card-body">
+                                <h5 class="card-title">Benvolio <span class="badge bg-secondary ms-2">Montague</span></h5>
+                                <p class="card-text">I do but keep the peace: put up thy sword, Or manage it to part these men with me.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Tybalt" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Tybalt <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">What, drawn, and talk of peace! I hate the word, As I hate hell, all Montagues, and thee: Have at thee, coward!</p>
+                            </div>
+                        </div>
+                        <div class="stage-direction text-center text-muted mb-3">They fight</div>
+                        <div class="stage-direction text-center text-muted mb-3">Enter, several of both houses, who join the fray; then enter Citizens, with clubs</div>
+                        <div class="dialogue-card card mb-2" data-speaker="First Citizen" data-family="None">
+                            <div class="card-body">
+                                <h5 class="card-title">First Citizen</h5>
+                                <p class="card-text">Clubs, bills, and partisans! strike! beat them down! Down with the Capulets! down with the Montagues!</p>
+                            </div>
+                        </div>
+                        <div class="stage-direction text-center text-muted mb-3">Enter CAPULET in his gown, and LADY CAPULET</div>
+                        <div class="dialogue-card card mb-2" data-speaker="Capulet" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Capulet <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">What noise is this? Give me my long sword, ho!</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Lady Capulet" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Lady Capulet <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">A crutch, a crutch! why call you for a sword?</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Capulet" data-family="Capulet">
+                            <div class="card-body">
+                                <h5 class="card-title">Capulet <span class="badge bg-secondary ms-2">Capulet</span></h5>
+                                <p class="card-text">My sword, I say! Old Montague is come, And flourishes his blade in spite of me.</p>
+                            </div>
+                        </div>
+                        <div class="stage-direction text-center text-muted mb-3">Enter MONTAGUE and LADY MONTAGUE</div>
+                        <div class="dialogue-card card mb-2" data-speaker="Montague" data-family="Montague">
+                            <div class="card-body">
+                                <h5 class="card-title">Montague <span class="badge bg-secondary ms-2">Montague</span></h5>
+                                <p class="card-text">Thou villain Capulet,--Hold me not, let me go.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Lady Montague" data-family="Montague">
+                            <div class="card-body">
+                                <h5 class="card-title">Lady Montague <span class="badge bg-secondary ms-2">Montague</span></h5>
+                                <p class="card-text">Thou shalt not stir a foot to seek a foe.</p>
+                            </div>
+                        </div>
+                        <div class="stage-direction text-center text-muted mb-3">Enter PRINCE, with Attendants</div>
+                        <div class="dialogue-card card mb-2" data-speaker="Prince" data-family="None">
+                            <div class="card-body">
+                                <h5 class="card-title">Prince</h5>
+                                <p class="card-text">Rebellious subjects, enemies to peace, Profaners of this neighbour-stained steel,-- Will they not hear? What, ho! you men, you beasts, That quench the fire of your pernicious rage With purple fountains issuing from your veins, On pain of torture, from those bloody hands Throw your mistemper'd weapons to the ground, And hear the sentence of your moved prince. Three civil brawls, bred of an airy word, By thee, old Capulet, and Montague, Have thrice disturb'd the quiet of our streets, And made Verona's ancient citizens Cast by their grave beseeming ornaments, To wield old partisans, in hands as old, Canker'd with peace, to part your canker'd hate: If ever you disturb our streets again, Your lives shall pay the forfeit of the peace. For this time, all the rest depart away: You Capulet; shall go along with me: And, Montague, come you this afternoon, To know our further pleasure in this case, To old Free-town, our common judgment-place. Once more, on pain of death, all men depart.</p>
+                            </div>
+                        </div>
+                        <div class="stage-direction text-center text-muted mb-3">Exeunt all but MONTAGUE, LADY MONTAGUE, and BENVOLIO</div>
+                        <div class="dialogue-card card mb-2" data-speaker="Montague" data-family="Montague">
+                            <div class="card-body">
+                                <h5 class="card-title">Montague <span class="badge bg-secondary ms-2">Montague</span></h5>
+                                <p class="card-text">Who set this ancient quarrel new abroach? Speak, nephew, were you by when it began?</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2" data-speaker="Benvolio" data-family="Montague">
+                            <div class="card-body">
+                                <h5 class="card-title">Benvolio <span class="badge bg-secondary ms-2">Montague</span></h5>
+                                <p class="card-text">Here were the servants of your adversary, And yours, close fighting ere I did approach: I drew to part them: in the instant came The fiery Tybalt, with his sword prepared, Which, as he breathed defiance to my ears, He swung about his head and cut the winds, Who nothing hurt withal hiss'd him in scorn: While we were interchanging thrusts and blows, Came more and more and fought on part and part, Till the prince came, who parted either part.</p>
+                            </div>
+                        </div>
+                        <div class="dialogue-card card mb-2 final-dialogue" data-speaker="Lady Montague" data-family="Montague">
+                            <div class="card-body">
+                                <h5 class="card-title">Lady Montague <span class="badge bg-secondary ms-2">Montague</span></h5>
+                                <p class="card-text">O, where is Romeo? saw you him to-day? Right glad I am he was not at this fray.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- Background Music -->
+    <audio id="background-music" loop>
+        <!-- Placeholder audio; replace with direct MP3 URL of medieval lute music (e.g., downloaded from YouTube or another legal source) -->
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+    <button class="btn btn-outline-secondary position-fixed bottom-0 end-0 m-3" onclick="toggleMusic()">
+        <i class="bi bi-music-note-beamed"></i> Toggle Music
+    </button>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script>
-        // Function to toggle theme
+        // Load saved preferences from localStorage
+        function loadPreferences() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            }
+            const savedFavorite = localStorage.getItem('favoriteCharacter');
+            if (savedFavorite) {
+                highlightCharacterLines(savedFavorite);
+                document.getElementById('role-filter').value = savedFavorite;
+            }
+        }
+
+        // Toggle theme and save to localStorage
         function toggleTheme() {
             const html = document.documentElement;
             const currentTheme = html.getAttribute('data-theme');
             const newTheme = currentTheme === 'light' ? 'dark' : 'light';
             html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon();
         }
 
-        // Function to toggle dialogue visibility
+        // Update theme toggle button icon
+        function updateThemeIcon() {
+            const themeToggle = document.querySelector('.theme-toggle');
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            themeToggle.innerHTML = currentTheme === 'light' ? '<i class="bi bi-moon"></i> Theme' : '<i class="bi bi-sun"></i> Theme';
+        }
+
+        // Toggle dialogue visibility
         let dialogueVisible = true;
         function toggleDialogue() {
             dialogueVisible = !dialogueVisible;
-            const dialogueLines = document.querySelectorAll('.dialogue p:not(.stage-direction)');
-            dialogueLines.forEach(line => {
+            const dialogueCards = document.querySelectorAll('.dialogue-card');
+            dialogueCards.forEach(card => {
                 if (dialogueVisible) {
-                    line.classList.remove('hidden');
-                    if (line.getBoundingClientRect().top < window.innerHeight * 0.8) {
-                        line.classList.add('visible');
+                    if (!card.classList.contains('filtered-out')) {
+                        card.classList.remove('hidden');
+                        if (card.getBoundingClientRect().top < window.innerHeight * 0.8) {
+                            card.classList.add('visible');
+                        }
                     }
                 } else {
-                    line.classList.add('hidden');
-                    line.classList.remove('visible');
+                    card.classList.add('hidden');
+                    card.classList.remove('visible');
                 }
             });
-            document.querySelector('.toggle-dialogue').textContent = dialogueVisible ? 'Hide Dialogue' : 'Show Dialogue';
+            document.querySelector('.toggle-dialogue').innerHTML = dialogueVisible ? '<i class="bi bi-eye"></i> Hide/Show' : '<i class="bi bi-eye-slash"></i> Hide/Show';
+            updateProgressBar();
         }
 
-        // Function to highlight character lines
+        // Highlight character lines and save to localStorage
         function highlightCharacterLines(speakerName) {
-            const allLines = document.querySelectorAll('.dialogue p');
-            allLines.forEach(line => {
-                line.classList.remove('highlighted');
-                if (line.getAttribute('data-speaker') === speakerName) {
-                    line.classList.add('highlighted');
+            const allCards = document.querySelectorAll('.dialogue-card');
+            allCards.forEach(card => {
+                card.classList.remove('highlighted');
+                if (card.getAttribute('data-speaker') === speakerName) {
+                    card.classList.add('highlighted');
                 }
             });
+            localStorage.setItem('favoriteCharacter', speakerName);
         }
 
-        // Function to show random quote
+        // Show random quote
         function showRandomQuote() {
-            const dialogueLines = document.querySelectorAll('.dialogue p[data-speaker]');
-            const randomIndex = Math.floor(Math.random() * dialogueLines.length);
-            const selectedLine = dialogueLines[randomIndex];
-            const quoteText = selectedLine.textContent.replace(/^[A-Za-z\s]+?\n/, '').trim(); // Remove speaker name
+            const dialogueCards = document.querySelectorAll('.dialogue-card:not(.hidden)');
+            if (dialogueCards.length === 0) return;
+            const randomIndex = Math.floor(Math.random() * dialogueCards.length);
+            const selectedCard = dialogueCards[randomIndex];
+            const quoteText = selectedCard.querySelector('.card-text').textContent.trim();
             const quoteBox = document.getElementById('quote-box');
             const quoteTextElement = document.getElementById('random-quote-text');
-            quoteTextElement.textContent = `"${quoteText}" — ${selectedLine.getAttribute('data-speaker')}`;
+            quoteTextElement.textContent = `"${quoteText}" — ${selectedCard.getAttribute('data-speaker')}`;
             quoteBox.classList.add('visible');
         }
 
-        // Function to hide quote box
+        // Hide quote box
         function hideQuoteBox() {
             document.getElementById('quote-box').classList.remove('visible');
         }
 
-        // Function to handle scroll-based animations
+        // Search functionality
+        function searchText() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const dialogueCards = document.querySelectorAll('.dialogue-card');
+            dialogueCards.forEach(card => {
+                const text = card.querySelector('.card-text').textContent.toLowerCase();
+                if (searchTerm && text.includes(searchTerm)) {
+                    card.classList.add('search-highlight');
+                } else {
+                    card.classList.remove('search-highlight');
+                }
+            });
+            updateProgressBar();
+        }
+
+        // Role filter
+        function filterByRole() {
+            const selectedRole = document.getElementById('role-filter').value;
+            const dialogueCards = document.querySelectorAll('.dialogue-card');
+            dialogueCards.forEach(card => {
+                if (selectedRole === '' || card.getAttribute('data-speaker') === selectedRole) {
+                    card.classList.remove('filtered-out');
+                    if (dialogueVisible) {
+                        card.classList.remove('hidden');
+                        if (card.getBoundingClientRect().top < window.innerHeight * 0.8) {
+                            card.classList.add('visible');
+                        }
+                    }
+                } else {
+                    card.classList.add('filtered-out');
+                    card.classList.add('hidden');
+                    card.classList.remove('visible');
+                }
+            });
+            highlightCharacterLines(selectedRole || localStorage.getItem('favoriteCharacter') || '');
+            updateProgressBar();
+        }
+
+        // Toggle background music
+        let musicPlaying = false;
+        function toggleMusic() {
+            const audio = document.getElementById('background-music');
+            musicPlaying = !musicPlaying;
+            if (musicPlaying) {
+                audio.play().catch(error => {
+                    console.error('Audio playback failed:', error);
+                });
+                document.querySelector('.bi-music-note-beamed').classList.replace('bi-music-note-beamed', 'bi-pause');
+            } else {
+                audio.pause();
+                document.querySelector('.bi-pause').classList.replace('bi-pause', 'bi-music-note-beamed');
+            }
+        }
+
+        // Sequential dialogue animation
+        function animateDialogueSequentially() {
+            const dialogueCards = document.querySelectorAll('.dialogue-card:not(.hidden)');
+            dialogueCards.forEach((card, index) => {
+                setTimeout(() => {
+                    if (!card.classList.contains('filtered-out')) {
+                        card.classList.add('visible');
+                    }
+                }, index * 500);
+            });
+        }
+
+        // Handle scroll-based animations
         function handleScrollAnimations() {
-            const elements = document.querySelectorAll('.dialogue p:not(.hidden), .section-title');
+            const elements = document.querySelectorAll('.dialogue-card:not(.hidden), .section-title, .prologue');
             elements.forEach((el, index) => {
                 const rect = el.getBoundingClientRect();
                 const isVisible = rect.top < window.innerHeight * 0.8;
-                if (isVisible) {
+                if (isVisible && !el.classList.contains('filtered-out')) {
                     setTimeout(() => {
                         el.classList.add('visible');
                     }, index * 100);
@@ -347,7 +773,7 @@
             });
         }
 
-        // Function to handle navigation active state
+        // Handle navigation active state
         function handleNavActiveState() {
             const sections = ['prologue', 'scene1'];
             const navLinks = document.querySelectorAll('.nav-link');
@@ -367,9 +793,62 @@
                     link.classList.add('active');
                 }
             });
+
+            updateProgressBar();
         }
 
-        // Event listeners for smooth scrolling and character highlighting
+        // Progress bar functionality using IntersectionObserver
+        function updateProgressBar() {
+            const sections = ['prologue', 'scene1'];
+            let currentSection = 'prologue';
+            sections.forEach(section => {
+                const element = document.getElementById(section);
+                const rect = element.getBoundingClientRect();
+                if (rect.top <= window.innerHeight / 2 && rect.bottom >= 0) {
+                    currentSection = section;
+                }
+            });
+
+            const progressBar = document.getElementById('progress-bar');
+            let elementsToTrack = [];
+            if (currentSection === 'prologue') {
+                elementsToTrack = document.querySelectorAll('.prologue');
+            } else {
+                elementsToTrack = document.querySelectorAll('.dialogue-card:not(.hidden):not(.filtered-out)');
+            }
+
+            const totalElements = elementsToTrack.length;
+            if (totalElements === 0) {
+                progressBar.style.width = '0%';
+                return;
+            }
+
+            let visibleCount = 0;
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        if (!entry.target.classList.contains('counted')) {
+                            entry.target.classList.add('counted');
+                            visibleCount++;
+                            const progress = (visibleCount / totalElements) * 100;
+                            progressBar.style.width = `${progress}%`;
+                        }
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            elementsToTrack.forEach(element => {
+                element.classList.remove('counted');
+                observer.observe(element);
+            });
+
+            // Cleanup observer when section changes
+            return () => {
+                elementsToTrack.forEach(element => observer.unobserve(element));
+            };
+        }
+
+        // Event listeners
         document.querySelectorAll('.nav-link').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -379,19 +858,29 @@
             });
         });
 
-        document.querySelectorAll('.speaker').forEach(speaker => {
-            speaker.addEventListener('click', () => {
-                const speakerName = speaker.textContent;
+        document.querySelectorAll('.card-title').forEach(title => {
+            title.addEventListener('click', () => {
+                const speakerName = title.textContent.split(' ')[0];
                 highlightCharacterLines(speakerName);
+                document.getElementById('role-filter').value = speakerName;
             });
         });
 
-        // Run on scroll and initial load
-        window.addEventListener('scroll', () => {
+        document.getElementById('search-input').addEventListener('input', searchText);
+        document.getElementById('role-filter').addEventListener('change', filterByRole);
+
+        // Run on load
+        window.addEventListener('load', () => {
+            loadPreferences();
+            updateThemeIcon();
             handleScrollAnimations();
             handleNavActiveState();
+            animateDialogueSequentially();
+            updateProgressBar();
         });
-        window.addEventListener('load', () => {
+
+        // Run on scroll
+        window.addEventListener('scroll', () => {
             handleScrollAnimations();
             handleNavActiveState();
         });
