@@ -1,31 +1,64 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Romeo and Juliet - Act I</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        :root {
+            --bg-color: #f8f1e9;
+            --text-color: #2f2f2f;
+            --container-bg: #ffffff;
+            --gradient-start: #fefce8;
+            --gradient-end: #f5e6d3;
+            --border-color: #4a2c0b;
+            --stage-direction-color: #6b4e31;
+            --speaker-color: #4a2c0b;
+            --nav-link-color: #4a2c0b;
+            --nav-link-hover-bg: #fef3e2;
+            --nav-link-active-color: #9b4d0a;
+            --nav-link-active-bg: #f8e1c8;
+            --title-color: #9c4221;
+            --subtitle-color: #854d0e;
+        }
+        [data-theme="dark"] {
+            --bg-color: #1f2937;
+            --text-color: #e5e7eb;
+            --container-bg: #374151;
+            --gradient-start: #4b5563;
+            --gradient-end: #1f2937;
+            --border-color: #9ca3af;
+            --stage-direction-color: #9ca3af;
+            --speaker-color: #d1d5db;
+            --nav-link-color: #d1d5db;
+            --nav-link-hover-bg: #4b5563;
+            --nav-link-active-color: #f59e0b;
+            --nav-link-active-bg: #78350f;
+            --title-color: #f59e0b;
+            --subtitle-color: #d4d4d8;
+        }
         body {
             font-family: 'Georgia', serif;
-            background-color: #f8f1e9;
+            background-color: var(--bg-color);
+            color: var(--text-color);
         }
         .dialogue {
             margin-left: 2rem;
             padding-left: 1rem;
-            border-left: 2px solid #4a2c0b;
+            border-left: 2px solid var(--border-color);
         }
         .speaker {
             font-variant: small-caps;
-            color: #4a2c0b;
+            color: var(--speaker-color);
         }
         .stage-direction {
             font-style: italic;
-            color: #6b4e31;
+            color: var(--stage-direction-color);
         }
         .prologue {
             font-style: italic;
-            color: #2f2f2f;
+            color: var(--text-color);
             opacity: 0;
             transform: translateY(20px);
             animation: fadeInUp 1.5s ease-out forwards;
@@ -40,7 +73,7 @@
             transform: translateX(0);
         }
         .dialogue p:hover {
-            background-color: #fef3e2;
+            background-color: var(--nav-link-hover-bg);
             transform: translateX(5px);
             transition: background-color 0.3s ease, transform 0.3s ease;
         }
@@ -70,14 +103,48 @@
             opacity: 1;
             transform: scale(1);
         }
+        .nav-link {
+            color: var(--nav-link-color);
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover {
+            background-color: var(--nav-link-hover-bg);
+        }
+        .nav-link.active {
+            color: var(--nav-link-active-color);
+            font-weight: bold;
+            background-color: var(--nav-link-active-bg);
+        }
+        .theme-toggle {
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            background-color: var(--nav-link-hover-bg);
+            color: var(--nav-link-color);
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .theme-toggle:hover {
+            background-color: var(--nav-link-active-bg);
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-amber-50 to-amber-100">
-    <div class="max-w-3xl w-full p-6 bg-white shadow-lg rounded-lg my-8">
-        <h1 class="text-4xl font-bold text-center text-amber-900 mb-6">Romeo and Juliet</h1>
-        <h2 class="text-2xl text-center text-amber-800 mb-4 section-title">Act I</h2>
+<body class="min-h-screen flex flex-col items-center bg-gradient-to-b from-[var(--gradient-start)] to-[var(--gradient-end)]">
+    <nav class="w-full bg-[var(--container-bg)] shadow-md sticky top-0 z-10">
+        <div class="max-w-3xl mx-auto p-4 flex justify-between items-center">
+            <div class="flex space-x-4">
+                <a href="#prologue" class="nav-link" data-section="prologue">Prologs</a>
+                <a href="#scene1" class="nav-link" data-section="scene1">1. aina</a>
+            </div>
+            <button class="theme-toggle" onclick="toggleTheme()">Toggle Theme</button>
+        </div>
+    </nav>
 
-        <h3 class="text-xl font-semibold text-center text-amber-700 mb-6 section-title">Prologue</h3>
+    <div class="max-w-3xl w-full p-6 bg-[var(--container-bg)] shadow-lg rounded-lg my-8">
+        <h1 class="text-4xl font-bold text-center text-[var(--title-color)] mb-6">Romeo and Juliet</h1>
+        <h2 class="text-2xl text-center text-[var(--subtitle-color)] mb-4 section-title">Act I</h2>
+
+        <h3 id="prologue" class="text-xl font-semibold text-center text-[var(--title-color)] mb-6 section-title">Prologue</h3>
         <p class="prologue text-center mb-8 leading-relaxed">
             Two households, both alike in dignity,<br>
             In fair Verona, where we lay our scene,<br>
@@ -95,7 +162,7 @@
             What here shall miss, our toil shall strive to mend.
         </p>
 
-        <h3 class="text-xl font-semibold text-center text-amber-700 mb-6 section-title">Scene I. Verona. A public place.</h3>
+        <h3 id="scene1" class="text-xl font-semibold text-center text-[var(--title-color)] mb-6 section-title">Scene I. Verona. A public place.</h3>
         <p class="stage-direction text-center mb-4">
             Enter SAMPSON and GREGORY, of the house of Capulet, armed with swords and bucklers
         </p>
@@ -170,6 +237,14 @@
     </div>
 
     <script>
+        // Function to toggle theme
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', newTheme);
+        }
+
         // Function to handle scroll-based animations
         function handleScrollAnimations() {
             const elements = document.querySelectorAll('.dialogue p, .section-title');
@@ -179,14 +254,52 @@
                 if (isVisible) {
                     setTimeout(() => {
                         el.classList.add('visible');
-                    }, index * 100); // Staggered animation for each element
+                    }, index * 100);
                 }
             });
         }
 
+        // Function to handle navigation active state
+        function handleNavActiveState() {
+            const sections = ['prologue', 'scene1'];
+            const navLinks = document.querySelectorAll('.nav-link');
+            let currentSection = 'prologue';
+
+            sections.forEach(section => {
+                const element = document.getElementById(section);
+                const rect = element.getBoundingClientRect();
+                if (rect.top <= window.innerHeight / 2 && rect.bottom >= 0) {
+                    currentSection = section;
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('data-section') === currentSection) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        // Smooth scrolling for nav links
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                targetElement.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
         // Run on scroll and initial load
-        window.addEventListener('scroll', handleScrollAnimations);
-        window.addEventListener('load', handleScrollAnimations);
+        window.addEventListener('scroll', () => {
+            handleScrollAnimations();
+            handleNavActiveState();
+        });
+        window.addEventListener('load', () => {
+            handleScrollAnimations();
+            handleNavActiveState();
+        });
     </script>
 </body>
 </html>
